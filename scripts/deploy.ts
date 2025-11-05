@@ -1,33 +1,34 @@
 import hre, { ethers, upgrades } from "hardhat";
 
-const PROXY_ADDRESS = process.env.PROXY_ADDRESS || "";
-
 async function main() {
-  if (!PROXY_ADDRESS) {
-    throw new Error("Set PROXY_ADDRESS in env to the deployed proxy address");
-  }
-
   await hre.run("compile");
 
-  const NAME_V2 = process.env.CONTRACT_NAME_V2 || "LoopPayV2";
-  const FQN_V2 = process.env.CONTRACT_FQN_V2 || "contracts/LoopPayV2.sol:LoopPayV2";
+  const NAME = process.env.CONTRACT_NAME || "LoopPay";
+  const FQN = process.env.CONTRACT_FQN || "contracts/LoopPay.sol:LoopPay";
 
-  console.log("Upgrading proxy:", PROXY_ADDRESS);
-  console.log("New impl:", NAME_V2, "(FQN:", FQN_V2 + ")");
+  const [deployer] = await ethers.getSigners();
+  const owner = process.env.OWNER || deployer.address;
 
-  let Impl;
+  console.log("Deployer:", deployer.address);
+  console.log("Owner for initialize:", owner);
+  console.log("Contract:", NAME, "(FQN:", FQN + ")");
+
+  let Factory;
   try {
-    Impl = await ethers.getContractFactory(FQN_V2);
+    Factory = await ethers.getContractFactory(FQN);
   } catch {
-    Impl = await ethers.getContractFactory(NAME_V2);
+    Factory = await ethers.getContractFactory(NAME);
   }
 
-  const upgraded = await upgrades.upgradeProxy(PROXY_ADDRESS, Impl);
+  const proxy = await upgrades.deployProxy(Factory, [owner], {
+    kind: "uups",
+    initializer: "initialize"
+  });
 
-  const tx = upgraded.deploymentTransaction();
+  const tx = proxy.deploymentTransaction();
   if (tx) await tx.wait(3);
 
-  const proxyAddress = await upgraded.getAddress();
+  const proxyAddress = await proxy.getAddress();
   console.log("Proxy:", proxyAddress);
 }
 
