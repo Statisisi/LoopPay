@@ -1,0 +1,72 @@
+name: Deploy (Base)
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: "Target network (base or base-sepolia)"
+        required: true
+        default: "base-sepolia"
+      action:
+        description: "deploy or upgrade"
+        required: true
+        default: "deploy"
+      proxy_address:
+        description: "Proxy address (required for upgrade)"
+        required: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build
+        run: pnpm build
+
+      - name: Deploy/Upgrade
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          BASE_MAINNET_RPC_URL: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+          OWNER: ${{ secrets.OWNER }}
+          PROXY_ADDRESS: ${{ github.event.inputs.proxy_address }}
+        run: |
+          if [ "${{ github.event.inputs.action }}" = "deploy" ]; then
+            pnpm hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }}
+          elif [ "${{ github.event.inputs.action }}" = "upgrade" ]; then
+            if [ -z "${{ github.event.inputs.proxy_address }}" ]; then
+              echo "proxy_address is required for upgrade"
+              exit 1
+            fi
+            pnpm hardhat run scripts/upgrade.ts --network ${{ github.event.inputs.network }}
+          else
+            echo "Unknown action"
+            exit 1
+          fi
+
+      - name: Verify (optional)
+        if: ${{ success() && github.event.inputs.action == 'deploy' }}
+        env:
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+          BASE_MAINNET_RPC_URL: ${{ secrets.BASE_MAINNET_RPC_URL }}
+          BASE_SEPOLIA_RPC_URL: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
+        run: |
+          echo "You can verify implementation with: pnpm hardhat verify --network ${{ github.event.inputs.network }} <implementation_address>"
