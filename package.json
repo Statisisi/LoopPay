@@ -1,37 +1,39 @@
 {
-  "name": "looppay",
+  "name": "LoopPay",
   "version": "0.1.0",
-  "private": true,
+  "description": "Automated recurring invoices and pull-based payments on Base (Mainnet & Sepolia)",
   "scripts": {
     "build": "hardhat compile",
-    "lint": "echo \"(add your linter here)\"",
-    "format": "echo \"(add your formatter here)\"",
     "test": "hardhat test",
-    "deploy": "hardhat run scripts/deploy.ts --network",
-    "upgrade": "hardhat run scripts/upgrade.ts --network",
-    "verify": "hardhat verify --network"
-  },
-  "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "@nomicfoundation/hardhat-verify": "^2.0.8",
-    "@openzeppelin/hardhat-upgrades": "^3.4.0",
-    "dotenv": "^16.4.5",
-    "ethers": "^6.13.2",
-    "hardhat": "^2.22.10",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network baseSepolia",
+    "deploy:mainnet": "hardhat run scripts/deploy.js --network base",
+    "verify": "hardhat verify --network base",
+    "release": "pnpm build && pnpm test"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.2",
-    "@openzeppelin/contracts-upgradeable": "^5.0.2",
-    "@coinbase/onchainkit": "^0.20.0",
-    "@coinbase/onchainkit-react": "^0.20.0",
-    "@coinbase/cbpay-js": "^1.34.0",
-    "viem": "^2.9.5",
-    "wagmi": "^2.12.0"
+    "@openzeppelin/hardhat-upgrades": "^2.3.1",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@coinbase/onchainkit": "latest",
+    "ethers": "^6.8.1",
+    "dotenv": "^16.4.1"
   },
+  "devDependencies": {
+    "hardhat": "^2.22.4",
+    "typescript": "^5.4.5",
+    "ts-node": "^10.9.2",
+    "@types/node": "^20.11.19"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stas-ivanovich/LoopPay"
+  },
+  "author": "stas-ivanovich",
+  "license": "MIT",
+  "private": false,
   "engines": {
-    "node": ">=20"
+    "node": ">=18.0.0"
   },
-  "packageManager": "pnpm@9.12.1"
+  "packageManager": "pnpm@9.0.0"
 }
