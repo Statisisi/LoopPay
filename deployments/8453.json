@@ -1,0 +1,10 @@
+{
+  "network": "base",
+  "chainId": 8453,
+  "proxy": "0x7010E82298Aa3D56DAA9d9433f315B1E978dC10E",
+  "implementation": "0x99b907dE9628Bc0A6Dc142ccDD9d00B63D81eFbA",
+  "txHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "deployer": "0x537AA372cE8367b1A998EBaA16aE4574EA006f00",
+  "timestamp": "2025-11-04T00:00:00Z",
+  "notes": "Initial proxy deployment on Base Mainnet (UUPS pattern)"
+}
